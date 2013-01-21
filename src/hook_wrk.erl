@@ -12,8 +12,8 @@ run(Post) ->
 	print_with_datetime("~nHook worker called~n"),
 	{ok, [Docroot, User, Repo]}
 		= cfgsrv:get_multiple(["server.docroot", "github.username", "github.repository"]),
-	[{<<"payload">>, JSON}] = Post,
-	_Decoded = mochijson2:decode(JSON), %% Maybe I will do something nice with it... Later
+	[{Bin, true}] = Post,
+	_Decoded = mochijson2:decode(Bin), %% Maybe I will do something nice with it... Later
 	os:cmd("mkdir -p " ++ Docroot),
 	case os:cmd("ls " ++ Docroot) of
 		[] ->
