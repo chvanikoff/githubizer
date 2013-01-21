@@ -1,0 +1,9 @@
+{application,githubizer,
+             [{description,[]},
+              {vsn,"1"},
+              {registered,[]},
+              {applications,[kernel,stdlib]},
+              {mod,{githubizer_app,[]}},
+              {env,[]},
+              {modules,[default_handler,githubizer,githubizer_app,
+                        githubizer_sup,hook_handler,hook_wrk,mochijson2]}]}.
