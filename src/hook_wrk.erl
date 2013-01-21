@@ -9,11 +9,20 @@
 %% ===================================================================
 
 run(Post) ->
-	print_with_datetime("Hook worker called"),
+	print_with_datetime("~nHook worker called~n"),
+	{ok, [Docroot, User, Repo]}
+		= cfgsrv:get("server.docroot", "github.username", "github.repository"),
 	[{<<"payload">>, JSON}] = Post,
-	_Decoded = mochijson2:decode(JSON),
-	os:cmd("cd ../traviania && git pull"),
-	print_with_datetime("New revision pulled").
+	_Decoded = mochijson2:decode(JSON), %% Maybe I will do something nice with it... Later
+	os:cmd("mkdir -p " ++ Docroot),
+	case os:cmd("ls " ++ Docroot) of
+		[] ->
+			os:cmd("git clone git@github.com:" ++ User ++ "/" ++ Repo ++ ".git " ++ Docroot);
+		_ ->
+			ok
+	end,
+	os:cmd("cd " ++ Docroot ++ " && git pull"),
+	print_with_datetime("New revision pulled~n").
 
 %% ===================================================================
 %% Internal functions
