@@ -10,7 +10,7 @@
 
 start() ->
 	ok = ensure_started([crypto, public_key, ssl, ranch, cowboy, githubizer, inets]),
-	add_deploy_key().
+	ok = add_deploy_key().
 
 %% ===================================================================
 %% Internal functions
@@ -53,19 +53,22 @@ add_deploy_key() ->
 	H = [{"Authorization","Basic " ++ base64:encode_to_string(User ++ ":" ++ Password)},
 		{"Content-Type", "text/json"}],
 	{ok, {{"HTTP/1.1", 200, "OK"}, _Headers, Body}} = httpc:request(get, {Url, H}, [], []),
-	case key_exists_on_github(Key, Body) of
+	[Raw_key, _] = binary:split(list_to_binary(Key), list_to_binary(" " ++ Email)),
+	case present_in_response(binary_to_list(Raw_key), Body) of
 		true ->
 			ok;
 		false ->
-			httpc:request(post, {Url, H, "application/x-www-form-urlencoded",
+			Res = httpc:request(post, {Url, H, "application/x-www-form-urlencoded",
 				"{\"title\": \"githubizer\", \"key\": \"" ++ Key ++ "\"}"}, [], []),
-			io:format("~n~nDeploy key created~n")
+			io:format("~n~nDeploy key created~n"),
+			ok
 	end.
 
-key_exists_on_github(_Key, []) ->
+present_in_response(_Key, []) ->
 	false;
-key_exists_on_github(Key, Keys) ->
-	case string:str(Keys, Key) of
+present_in_response(Str, Response) ->
+
+	case string:str(Response, Str) of
 		0 ->
 			false;
 		_ ->
