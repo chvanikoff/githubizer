@@ -12,7 +12,7 @@
 
 start(_StartType, _StartArgs) ->
 	Sup = githubizer_sup:start_link(),
-	{ok, [Port, Url, Nba]} = cfgsrv:get_multiple(["http_server.port", "http_server.nba", "http_server.port"]),
+	{ok, [Port, Url, Nba]} = cfgsrv:get_multiple(["http_server.port", "http_server.url", "http_server.nba"]),
 	Dispatch = [
 		{'_', [
 			{Url, hook_handler, []},
