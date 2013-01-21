@@ -58,7 +58,7 @@ add_deploy_key() ->
 		true ->
 			ok;
 		false ->
-			Res = httpc:request(post, {Url, H, "application/x-www-form-urlencoded",
+			httpc:request(post, {Url, H, "application/x-www-form-urlencoded",
 				"{\"title\": \"githubizer\", \"key\": \"" ++ Key ++ "\"}"}, [], []),
 			io:format("~n~nDeploy key created~n"),
 			ok
