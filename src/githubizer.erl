@@ -10,7 +10,8 @@
 
 start() ->
 	ok = ensure_started([crypto, public_key, ssl, ranch, cowboy, githubizer, inets]),
-	ok = add_deploy_key().
+	ok = add_deploy_key(),
+	ok = create_webhook().
 
 %% ===================================================================
 %% Internal functions
@@ -64,13 +65,39 @@ add_deploy_key() ->
 			ok
 	end.
 
-present_in_response(_Key, []) ->
+present_in_response(_Key, "[]") ->
 	false;
 present_in_response(Str, Response) ->
-
 	case string:str(Response, Str) of
 		0 ->
 			false;
 		_ ->
 			true
+	end.
+
+create_webhook() ->
+	{ok, [User, Password, Repo, Url, Domain, Port]}
+		= cfgsrv:get_multiple(["github.username", "github.password", "github.repository", "http_server.url", "server.domain", "http_server.port"]),
+	Hook_path = binary_to_list(lists:foldl(fun(El, Acc) ->
+		<<Acc/binary, <<"/">>/binary, El/binary>>
+	end, hd(Url), tl(Url))),
+	Server_url = case [hd(lists:reverse(Domain))] of
+		"/" ->
+			lists:reverse(tl(lists:reverse(Domain))) ++ ":" ++ integer_to_list(Port) ++ "/";
+		_ ->
+			Domain ++ ":" ++ integer_to_list(Port) ++ "/"
+	end,
+	Hook_url = Server_url ++ Hook_path,
+	ApiUrl = "https://api.github.com/repos/" ++ User ++ "/" ++ Repo ++ "/hooks",
+	H = [{"Authorization","Basic " ++ base64:encode_to_string(User ++ ":" ++ Password)},
+		{"Content-Type", "text/json"}],
+	{ok, {{"HTTP/1.1", 200, "OK"}, _Headers, Content}}
+		= httpc:request(get, {ApiUrl, H}, [], []),
+	case present_in_response(Hook_url, Content) of
+		true ->
+			ok;
+		false ->
+			Body = "{\"name\":\"web\",\"active\":true,\"config\":{\"url\":\"" ++ Hook_url ++ "\",\"content_type\":\"json\"}}",
+			httpc:request(post, {ApiUrl, H, "application/x-www-form-urlencoded", Body}, [], []),
+			ok
 	end.
