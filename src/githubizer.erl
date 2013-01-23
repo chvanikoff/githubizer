@@ -33,7 +33,7 @@ ensure_started([App | Apps]) ->
 
 generate_ssh_key(Email) ->
 	[] = os:cmd("ssh-keygen -t rsa -N \"\" -f ~/.ssh/githubizer -C \"" ++ Email ++ "\" -q"),
-	case os:cmd("ps aux | grep ssh-agent") of
+	case os:cmd("ps aux | grep \"[s]sh-agent\"") of
 		[] ->
 			os:cmd("eval `ssh-agent`");
 		_ ->
