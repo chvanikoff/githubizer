@@ -1,7 +1,9 @@
 githubizer
 ==========
--
+
 automatic deploy from github to server
+-
+Attention! This is early Beta version and it's behaviour can differ from what-you-expect!
 -
 
 ENGLISH
