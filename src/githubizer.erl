@@ -32,14 +32,11 @@ ensure_started([App | Apps]) ->
 	ensure_started(Apps).
 
 generate_ssh_key(Email) ->
+	[] = os:cmd("mkdir -p ~/.ssh"),
+	%% Generate ssh key for Githubizer
 	[] = os:cmd("ssh-keygen -t rsa -N \"\" -f ~/.ssh/githubizer -C \"" ++ Email ++ "\" -q"),
-	case os:cmd("ps aux | grep \"[s]sh-agent\"") of
-		[] ->
-			os:cmd("eval `ssh-agent`");
-		_ ->
-			ok
-	end,
-	os:cmd("ssh-add ~/.ssh/githubizer").
+	%% Add generated key to list of identity files for github.com
+	[] = os:cmd("echo \"\nHost github.com\n\tIdentityFile ~/.ssh/githubizer.pub\n\" >> ~/.ssh/config").
 
 get_ssh_key(Email) ->
 	Key = case os:cmd("if [ -f ~/.ssh/githubizer.pub ]; then cat ~/.ssh/githubizer.pub; else exit 0; fi") of
@@ -57,7 +54,7 @@ add_deploy_key() ->
 		= cfgsrv:get_multiple(["github.username", "github.email", "github.password", "github.repository"]),
 	Key = get_ssh_key(Email),
 	Url = "https://api.github.com/repos/" ++ User ++ "/" ++ Repo ++ "/keys",
-	H = [{"Authorization","Basic " ++ base64:encode_to_string(User ++ ":" ++ Password)},
+	H = [{"Authorization", "Basic " ++ base64:encode_to_string(User ++ ":" ++ Password)},
 		{"Content-Type", "text/json"}],
 	{ok, {{"HTTP/1.1", 200, "OK"}, _Headers, Body}} = httpc:request(get, {Url, H}, [], []),
 	[Raw_key, _] = binary:split(list_to_binary(Key), list_to_binary(" " ++ Email)),
