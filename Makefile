@@ -3,18 +3,18 @@ REBAR = `which rebar || echo ./rebar`
 all: deps compile
 
 compile:
-	@($(REBAR) compile)
+	@( $(REBAR) compile )
 
 deps:
-	@($(REBAR) get-deps)
+	@( $(REBAR) get-deps )
 
 run:
 	erl -pa ebin deps/*/ebin -s githubizer
 
 test:
-	@($(REBAR) eunit)
+	@( $(REBAR) eunit )
 
 clean:
-	@($(REBAR) clean)
+	@( $(REBAR) clean )
 
-.PHONY: all deps test
+.PHONY: all compile deps run test clean
