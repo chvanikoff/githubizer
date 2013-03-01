@@ -36,7 +36,7 @@ generate_ssh_key(Email) ->
 	%% Generate ssh key for Githubizer
 	[] = os:cmd("ssh-keygen -t rsa -N \"\" -f ~/.ssh/githubizer -C \"" ++ Email ++ "\" -q"),
 	%% Add generated key to list of identity files for github.com
-	[] = os:cmd("echo \"\nHost github.com\n\tIdentityFile ~/.ssh/githubizer.pub\n\" >> ~/.ssh/config").
+	[] = os:cmd("echo \"\nHost github.com\n\tIdentityFile ~/.ssh/githubizer\n\" >> ~/.ssh/config").
 
 get_ssh_key(Email) ->
 	Key = case os:cmd("if [ -f ~/.ssh/githubizer.pub ]; then cat ~/.ssh/githubizer.pub; else exit 0; fi") of
