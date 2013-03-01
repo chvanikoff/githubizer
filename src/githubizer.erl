@@ -82,11 +82,8 @@ present_in_response(Str, Response) ->
 	end.
 
 create_webhook() ->
-	{ok, [User, Password, Repo, Url, Domain, Port]}
+	{ok, [User, Password, Repo, Hook_path, Domain, Port]}
 		= cfgsrv:get_multiple(["github.username", "github.password", "github.repository", "http_server.url", "server.domain", "http_server.port"]),
-	Hook_path = binary_to_list(lists:foldl(fun(El, Acc) ->
-		<<Acc/binary, <<"/">>/binary, El/binary>>
-	end, hd(Url), tl(Url))),
 	Server_url = case [hd(lists:reverse(Domain))] of
 		"/" ->
 			lists:reverse(tl(lists:reverse(Domain))) ++ ":" ++ integer_to_list(Port) ++ "/";
