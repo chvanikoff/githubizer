@@ -20,13 +20,8 @@ start() ->
 ensure_started([]) -> ok;
 ensure_started([App | Apps]) ->
 	Msg = case application:start(App) of
-		ok ->
-			"started";
-		{error, {already_started, App}} ->
-			"was already started";
-		Error ->
-			io:format("Error starting ~p:~n~p~n", [App, Error]),
-			throw(Error)
+		ok -> "started";
+		{error, {already_started, App}} -> "was already started"
 	end,
 	io:format("~p " ++ Msg ++ "~n", [App]),
 	ensure_started(Apps).
@@ -82,13 +77,13 @@ present_in_response(Str, Response) ->
 	end.
 
 create_webhook() ->
-	{ok, [User, Password, Repo, Hook_path, Domain, Port]}
+	{ok, [User, Password, Repo, [Hook_path], Domain, Port]}
 		= cfgsrv:get_multiple(["github.username", "github.password", "github.repository", "http_server.url", "server.domain", "http_server.port"]),
 	Server_url = case [hd(lists:reverse(Domain))] of
 		"/" ->
-			lists:reverse(tl(lists:reverse(Domain))) ++ ":" ++ integer_to_list(Port) ++ "/";
+			lists:reverse(tl(lists:reverse(Domain))) ++ ":" ++ integer_to_list(Port);
 		_ ->
-			Domain ++ ":" ++ integer_to_list(Port) ++ "/"
+			Domain ++ ":" ++ integer_to_list(Port)
 	end,
 	Hook_url = Server_url ++ Hook_path,
 	ApiUrl = "https://api.github.com/repos/" ++ User ++ "/" ++ Repo ++ "/hooks",
