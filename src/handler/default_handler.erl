@@ -7,7 +7,7 @@
 -export([
 	init/3,
 	handle/2,
-	terminate/2
+	terminate/3
 ]).
 
 %% ===================================================================
@@ -22,5 +22,5 @@ handle(Req, State) ->
 	{ok, Req2} = cowboy_req:reply(404, [], HTML, Req),
 	{ok, Req2, State}.
 
-terminate(_Req, _State) ->
+terminate(_Reason, _Req, _State) ->
 	ok.
